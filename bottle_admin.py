@@ -10,8 +10,8 @@ class Admin(object):
         self.app = app
         self._models = []
 
-    def register(self, model=None, modeladmin=None):
-        self._models.append((model, modeladmin))
+    def register(self, model=None):
+        self._models.append(model)
 
 
 admin = Admin()
