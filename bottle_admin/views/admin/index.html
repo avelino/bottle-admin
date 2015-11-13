@@ -1,0 +1,20 @@
+{% extends 'admin/base.html' %}
+<!DOCTYPE html>
+{% block container %}
+<table class="table">
+  <thead>
+    <tr>
+      <th colspan="3">Bottle Admin</th>
+    </tr>
+  </thead>
+  </tbody>
+    {% for model in models %}
+      <tr>
+        <td><a href="{{ model.list_url }}">{{ model.name|capitalize }}</a></td>
+        <td><a href="{{ model.add_url }}">add</a></td>
+        <td><a href="{{ model.change_url }}">change</a></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock container %}

@@ -1,33 +1,72 @@
 # coding: utf-8
-from .views import admin_home, admin_view
+
+from bottle import Bottle
+from sqlalchemy import inspect
+
+from .controllers.main import home_view, add_model_view
 
 
-class Admin(object):
+class AlreadyRegistered(Exception):
+    pass
+
+
+class AdminSite(object):
     """
-    Creates an admin interface for models
+    Creates an admin site for models
     """
 
     url_prefix = '/admin'
 
     def __init__(self, app=None):
-        self.app = app
-        self._models = []
+        self.app = Bottle()
+        self._registry = []
 
     def register(self, model=None):
-        self._models.append(model)
+        if model in self._registry:
+            raise AlreadyRegistered(u'Model {} has already beeen registered'.format(model))
+        self._registry.append(model)
 
     def setup_routing(self, app):
-        app.route(
-            '{prefix}'.format(prefix=self.url_prefix),
+        self.app.route(
+            '/',
             ['GET'],
-            admin_home)
+            home_view)
 
-        for model in self._models:
-            app.route(
-                '{prefix}/{model_name}/'.format(
-                    model_name=model.__tablename__,
-                    prefix=self.url_prefix),
-                ['GET'],
-                admin_view)
+        self.app.route(
+            '/<model_name>/add'.format(prefix=self.url_prefix),
+            ['GET'],
+            add_model_view)
 
-admin = Admin()
+        app.mount(self.url_prefix, self.app)
+
+    def _build_models_dict(self):
+        """
+        Build the models dict containing the URLs for each action and model
+        """
+
+        models_dict = {}
+        for model in self._registry:
+            model_data = {}
+
+            model_name = model.__name__.lower()
+            model_data['name'] = model_name
+
+            mapper = inspect(model)
+            attrs = [prop.columns[0] for prop in mapper.attrs]
+            model_data['columns'] = [{'name': prop.name} for prop in attrs
+                                     if prop.name != 'id']
+
+            model_data['add_url'] = '{}/{}/add'.format(self.url_prefix, model_name)
+            model_data['list_url'] = '{}/{}'.format(self.url_prefix, model_name)
+            model_data['change_url'] = '{}/{}/change'.format(self.url_prefix, model_name)
+            model_data['delete'] = '{}/{}/delete'.format(self.url_prefix, model_name)
+
+            models_dict[model] = model_data
+        return models_dict
+
+    def get_model_list(self):
+        models_dict = self._build_models_dict()
+        return sorted(models_dict.values(), key=lambda x: x['name'].lower())
+
+
+site = AdminSite()
