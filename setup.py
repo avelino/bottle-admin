@@ -46,6 +46,5 @@ setup(name='bottle-admin',
           'console_scripts': ["bottle = bottle_boilerplate:main"]
       },
       py_modules=['bottle_admin'],
-      scripts=['bottle_admin.py'],
       include_package_data=True,
       zip_safe=False)
