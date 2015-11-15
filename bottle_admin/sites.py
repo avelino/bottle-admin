@@ -4,7 +4,6 @@ from bottle import Bottle
 from sqlalchemy import inspect
 
 
-
 class AlreadyRegistered(Exception):
     pass
 
@@ -32,7 +31,7 @@ class AdminSite(object):
         self._registry.append(model)
 
     def setup_routing(self, app):
-        from .controllers.main import (home_view, add_model_get_view, 
+        from .controllers.main import (home_view, add_model_get_view,
                                        add_model_post_view, list_model_view)
         self.app.route(
             '/',
@@ -97,7 +96,6 @@ class AdminSite(object):
             if meta['name'] == model_name:
                 return meta
         raise NotRegistered(u'Model {} has not been registered'.format(model_name))
-        
 
 
 site = AdminSite()

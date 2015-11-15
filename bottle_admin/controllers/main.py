@@ -34,6 +34,7 @@ def list_model_view(model_name):
     model_class = site.get_model_class(model_name)
     session = sessionmaker(bind=site.engine)()
     objects = list(session.query(model_class).all())
+
     def get_objects_as_list(objects):
         results = []
         for row in objects:
@@ -44,6 +45,7 @@ def list_model_view(model_name):
                 row_list.append((col.name, getattr(row, col.name)))
             results.append(row_list)
         return results
+
     return {
         'model_meta': site.get_model_meta(model_name),
         'results': get_objects_as_list(objects),
