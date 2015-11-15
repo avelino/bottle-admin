@@ -1,0 +1,34 @@
+{% extends 'admin/base.html' %}
+<!DOCTYPE html>
+
+{% block title %}
+Bottle Admin - List {{ model_meta.name }}
+{% endblock title %}
+
+{% block container %}
+<h3></h3>
+{% if not results %}
+<p>{{ model_meta.name|capitalize }} not found.</p>
+{% else %}
+<table>
+  <thead>
+    <tr>
+      {% for field, _ in results.0 %}
+        <th>{{ field }}</th>
+      {% endfor %}
+    </th>
+  <thead>
+  <tbody>
+  {% for row in results %}
+    <tr>
+      {% for _, value in row %}
+        <td>{{ value }}</td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock container %}
+
+
