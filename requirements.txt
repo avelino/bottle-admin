@@ -1,0 +1,3 @@
+bottle==0.12.9
+bottle-boilerplate==0.3
+SQLAlchemy==1.0.9
