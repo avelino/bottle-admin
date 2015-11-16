@@ -9,12 +9,18 @@ Bottle Admin - Add {{ model.name }}
 <h3>Add {{ model.name }}</h3>
 <form method="POST" action="{{ model.add_url }}">
   {% for column in model.columns %}
-  <div>
-    <label for="id_{{ column }}">{{ column|capitalize }}</label>
-    <input type="text" name="{{ column }}" id="id_{{ column }}">
+  <div class="row">
+    <div class="form-group col-md-4">
+      <label for="id_{{ column }}">{{ column|capitalize }}</label>
+      <input type="text" class="form-control" name="{{ column }}" id="id_{{ column }}">
+    </div>
   </div>
   {% endfor %}
-  <button type="submit">Submit</button>
+  <div class="row">
+    <div class="form-group col-md-4">
+      <button type="submit" class="btn btn-default">Submit</button>
+    </div>
+  </div>
 </form>
 {% endblock container %}
 

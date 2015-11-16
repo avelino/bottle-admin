@@ -6,23 +6,24 @@ Bottle Admin - List {{ model_meta.name }}
 {% endblock title %}
 
 {% block container %}
-<h3></h3>
+<h3 style="margin-top: 0px">{{ model_meta.name|capitalize }}</h3>
 {% if not results %}
 <p>{{ model_meta.name|capitalize }} not found.</p>
 {% else %}
-<table>
+<table class="table table-bordered table-striped table-hover">
   <thead>
-    <tr>
-      {% for field, _ in results.0 %}
-        <th>{{ field }}</th>
-      {% endfor %}
-    </th>
-  <thead>
+      <tr>
+        {% for column in model_meta.columns %}
+          <th>{{ column }}</th>
+        {% endfor %}
+      </tr>
+    </a>
+  </thead>
   <tbody>
   {% for row in results %}
     <tr>
       {% for _, value in row %}
-        <td>{{ value }}</td>
+        <td><a href="#">{{ value }}</a></td>
       {% endfor %}
     </tr>
   {% endfor %}
