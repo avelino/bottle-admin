@@ -1,20 +1,28 @@
 {% extends 'admin/base.html' %}
 <!DOCTYPE html>
 {% block container %}
-<table class="table">
-  <thead>
-    <tr>
-      <th colspan="3">Bottle Admin</th>
-    </tr>
-  </thead>
-  </tbody>
-    {% for model in models %}
+<div class="col-md-8">
+  <table class="table">
+    <thead>
       <tr>
-        <td><a href="{{ model.list_url }}">{{ model.name|capitalize }}</a></td>
-        <td><a href="{{ model.add_url }}">add</a></td>
-        <td><a href="{{ model.change_url }}">change</a></td>
+        <th colspan="3">App/project name</th>
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </thead>
+    </tbody>
+      {% for model in models %}
+        <tr>
+          <td>
+            <a href="{{ model.list_url }}">{{ model.name|capitalize }}</a>
+          </td>
+          <td class="text-right">
+            <a href="{{ model.add_url }}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add</a>
+          </td>
+          <td class="text-right">
+            <a href="{{ model.change_url }}"><span class="glyphicon glyphicon-pencil" aria-hidden="true"> Change</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock container %}
