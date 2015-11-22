@@ -1,5 +1,5 @@
 bottle==0.12.9
 bottle-boilerplate==0.3
 SQLAlchemy==1.0.9
-beaker
-bottle_sqlalchemy
+Beaker==1.7.0
+bottle-sqlalchemy==0.4.2
