@@ -19,6 +19,9 @@ class AdminSite(object):
 
     url_prefix = '/admin'
 
+    def __repr__(self):
+        return "<AdminSite('{}', '{}')>".format(self.app, self._registry)
+
     def __init__(self, app=None, engine=None):
         self.app = app or Bottle()
         self.engine = engine
@@ -69,13 +72,13 @@ class AdminSite(object):
 
             mapper = inspect(model)
             attrs = [prop.columns[0] for prop in mapper.attrs]
-            model_data['columns'] = [prop.name for prop in attrs
-                                     if prop.name != 'id']
+            model_data['columns'] = (prop.name for prop in attrs
+                                     if prop.name != 'id')
 
             model_data['add_url'] = '{}/{}/add'.format(self.url_prefix, model_name)
             model_data['list_url'] = '{}/{}'.format(self.url_prefix, model_name)
             model_data['change_url'] = '{}/{}/change'.format(self.url_prefix, model_name)
-            model_data['delete'] = '{}/{}/delete'.format(self.url_prefix, model_name)
+            model_data['delete_url'] = '{}/{}/delete'.format(self.url_prefix, model_name)
 
             models_dict[model] = model_data
         return models_dict
