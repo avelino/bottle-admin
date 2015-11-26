@@ -20,7 +20,7 @@ class AdminSite(object):
     url_prefix = '/admin'
 
     def __repr__(self):
-        return "<AdminSite('{}', '{}')>".format(self.app, self._registry)
+        return "<AdminSite('{0}', '{1}')>".format(self.app, self._registry)
 
     def __init__(self, app=None, engine=None):
         self.app = app or Bottle()
@@ -29,7 +29,7 @@ class AdminSite(object):
 
     def register(self, model=None):
         if model in self._registry:
-            message = u'Model {} has already beeen registered'.format(model)
+            message = u'Model {0} has already beeen registered'.format(model)
             raise AlreadyRegistered(message)
         self._registry.append(model)
 
@@ -75,10 +75,10 @@ class AdminSite(object):
             model_data['columns'] = (prop.name for prop in attrs
                                      if prop.name != 'id')
 
-            model_data['add_url'] = '{}/{}/add'.format(self.url_prefix, model_name)
-            model_data['list_url'] = '{}/{}'.format(self.url_prefix, model_name)
-            model_data['change_url'] = '{}/{}/change'.format(self.url_prefix, model_name)
-            model_data['delete_url'] = '{}/{}/delete'.format(self.url_prefix, model_name)
+            model_data['add_url'] = '{0}/{1}/add'.format(self.url_prefix, model_name)
+            model_data['list_url'] = '{0}/{1}'.format(self.url_prefix, model_name)
+            model_data['change_url'] = '{0}/{1}/change'.format(self.url_prefix, model_name)
+            model_data['delete_url'] = '{0}/{1}/delete'.format(self.url_prefix, model_name)
 
             models_dict[model] = model_data
         return models_dict
@@ -91,14 +91,14 @@ class AdminSite(object):
         for model_class in self._registry:
             if model_class.__name__.lower() == model_name:
                 return model_class
-        raise NotRegistered(u'Model {} has not been registered'.format(model_name))
+        raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
 
     def get_model_meta(self, model_name):
         models_meta = self.get_model_meta_list()
         for meta in models_meta:
             if meta['name'] == model_name:
                 return meta
-        raise NotRegistered(u'Model {} has not been registered'.format(model_name))
+        raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
 
 
 site = AdminSite()
