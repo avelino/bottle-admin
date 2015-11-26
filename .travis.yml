@@ -10,4 +10,7 @@ install:
     - pip install -e .
 script:
     - flake8 --ignore=E501 bottle_admin
-    - py.test --cov bottle_admin
+    - py.test bottle_admin --cov bottle_admin
+after-install:
+    - pip install -qq coveralls
+    - coveralls
