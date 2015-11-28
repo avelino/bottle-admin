@@ -41,11 +41,11 @@ class TestAdminSite(object):
         model_name = model.__name__.lower()
         assert meta['name'] == model_name
         assert set(meta['columns']) == columns
-        assert meta['add_url'] == '{}/{}/add'.format(AdminSite.url_prefix, model_name)
-        assert meta['list_url'] == '{}/{}'.format(AdminSite.url_prefix, model_name)
-        change_url = '{}/{}/change'.format(AdminSite.url_prefix, model_name)
+        assert meta['add_url'] == '{0}/{1}/add'.format(AdminSite.url_prefix, model_name)
+        assert meta['list_url'] == '{0}/{1}'.format(AdminSite.url_prefix, model_name)
+        change_url = '{0}/{1}/change'.format(AdminSite.url_prefix, model_name)
         assert meta['change_url'] == change_url
-        delete_url = '{}/{}/delete'.format(AdminSite.url_prefix, model_name)
+        delete_url = '{0}/{1}/delete'.format(AdminSite.url_prefix, model_name)
         assert meta['delete_url'] == delete_url
 
     def test_get_model_meta_list(self, site):
