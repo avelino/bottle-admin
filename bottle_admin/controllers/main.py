@@ -26,7 +26,7 @@ def add_model_post_controller(model_name):
     session = sessionmaker(bind=site.engine)()
     session.add(model_class(**fields))
     session.commit()
-    return redirect('/admin/{}'.format(model_name))
+    return redirect('/admin/{0}'.format(model_name))
 
 
 def delete_model_controller(model_name, model_id):
@@ -37,7 +37,7 @@ def delete_model_controller(model_name, model_id):
         return u'{0}: {1} has not been found'.format(model_class.__name__, model_id)
     session.delete(obj)
     session.commit()
-    return redirect('/admin/{}'.format(model_name))
+    return redirect('/admin/{0}'.format(model_name))
 
 
 @jinja2_view('admin/list.html')
