@@ -36,12 +36,12 @@ def test_delete_model_controller(session, app_test):
     session.add(user2)
     session.commit()
 
-    status = app_test.get('/admin/user/delete/{}'.format(user1.id)).status
+    status = app_test.get('/admin/user/delete/{0}'.format(user1.id)).status
     assert status == '302 Found'
-    request = app_test.get('/admin/user/delete/{}'.format(user1.id))
+    request = app_test.get('/admin/user/delete/{0}'.format(user1.id))
     request.mustcontain('has not been found')
 
-    status = app_test.get('/admin/user/delete/{}'.format(user2.id)).status
+    status = app_test.get('/admin/user/delete/{0}'.format(user2.id)).status
     assert status == '302 Found'
-    request = app_test.get('/admin/user/delete/{}'.format(user2.id))
+    request = app_test.get('/admin/user/delete/{0}'.format(user2.id))
     request.mustcontain('has not been found')
