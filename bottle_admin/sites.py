@@ -34,27 +34,34 @@ class AdminSite(object):
         self._registry.append(model)
 
     def setup_routing(self, app):
-        from .controllers.main import (home_view, add_model_get_view,
-                                       add_model_post_view, list_model_view)
+        from .controllers.main import (add_model_get_controller,
+                                       add_model_post_controller,
+                                       delete_model_controller, home_controller,
+                                       list_model_controller)
         self.app.route(
             '/',
             ['GET'],
-            home_view)
+            home_controller)
 
         self.app.route(
             '/<model_name>/add',
             ['GET'],
-            add_model_get_view)
+            add_model_get_controller)
 
         self.app.route(
             '/<model_name>/add',
             ['POST'],
-            add_model_post_view)
+            add_model_post_controller)
 
         self.app.route(
             '/<model_name>',
             ['GET'],
-            list_model_view)
+            list_model_controller)
+
+        self.app.route(
+            '/<model_name>/delete/<model_id>',
+            ['GET'],
+            delete_model_controller)
 
         app.mount(self.url_prefix, self.app)
 

@@ -13,6 +13,7 @@ Bottle Admin - List {{ model_meta.name }}
 <table class="table table-bordered table-striped table-hover">
   <thead>
       <tr>
+        <th>Actions</th>
         {% for column in model_meta.columns %}
           <th>{{ column }}</th>
         {% endfor %}
@@ -22,8 +23,16 @@ Bottle Admin - List {{ model_meta.name }}
   <tbody>
   {% for row in results %}
     <tr>
-      {% for _, value in row %}
-        <td><a href="#">{{ value }}</a></td>
+      {% for column, value in row %}
+        {% if column == 'id' %}
+          <td style="width: 100px">
+            <a href="{{ model_meta.delete_url }}/{{ value }}">
+              <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            </a>
+          </td>
+        {% else %}
+          <td><a href="#">{{ value }}</a></td>
+        {% endif %}
       {% endfor %}
     </tr>
   {% endfor %}
