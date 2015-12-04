@@ -34,7 +34,7 @@ def delete_model_controller(model_name, model_id):
     session = sessionmaker(bind=site.engine)()
     obj = session.query(model_class).get(model_id)
     if not obj:
-        return u'{}: {} has not been found'.format(model_class.__name__, model_id)
+        return u'{0}: {1} has not been found'.format(model_class.__name__, model_id)
     session.delete(obj)
     session.commit()
     return redirect('/admin/{}'.format(model_name))
