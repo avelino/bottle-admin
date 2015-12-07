@@ -30,7 +30,7 @@ def test_add_model_post_controller(session, app_test):
 
 
 def test_delete_model_controller(session, app_test):
-    app_test.get('/admin/user/delete/1').mustcontain('has not been found')
+    app_test.get('/admin/user/delete/1').mustcontain('not found')
 
     user1 = User(name='name', fullname='full', password='pass')
     session.add(user1)
@@ -41,7 +41,7 @@ def test_delete_model_controller(session, app_test):
     status = app_test.get('/admin/user/delete/{0}'.format(user1.id)).status
     assert status == '302 Found'
     response = app_test.get('/admin/user/delete/{0}'.format(user1.id))
-    response.mustcontain('has not been found')
+    response.mustcontain('not found')
 
     status = app_test.get('/admin/user/delete/{0}'.format(user2.id)).status
     assert status == '302 Found'
