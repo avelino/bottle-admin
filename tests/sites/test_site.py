@@ -43,8 +43,8 @@ class TestAdminSite(object):
         assert set(meta['columns']) == columns
         assert meta['add_url'] == '{0}/{1}/add'.format(AdminSite.url_prefix, model_name)
         assert meta['list_url'] == '{0}/{1}'.format(AdminSite.url_prefix, model_name)
-        change_url = '{0}/{1}/change'.format(AdminSite.url_prefix, model_name)
-        assert meta['change_url'] == change_url
+        edit_url = '{0}/{1}/edit'.format(AdminSite.url_prefix, model_name)
+        assert meta['edit_url'] == edit_url
         delete_url = '{0}/{1}/delete'.format(AdminSite.url_prefix, model_name)
         assert meta['delete_url'] == delete_url
 

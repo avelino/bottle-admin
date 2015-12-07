@@ -34,27 +34,46 @@ class AdminSite(object):
         self._registry.append(model)
 
     def setup_routing(self, app):
-        from .controllers.main import (home_view, add_model_get_view,
-                                       add_model_post_view, list_model_view)
+        from .controllers.main import (add_model_get_controller,
+                                       add_model_post_controller,
+                                       edit_model_get_controller,
+                                       edit_model_post_controller,
+                                       delete_model_controller, home_controller,
+                                       list_model_controller)
         self.app.route(
             '/',
             ['GET'],
-            home_view)
+            home_controller)
 
         self.app.route(
             '/<model_name>/add',
             ['GET'],
-            add_model_get_view)
+            add_model_get_controller)
 
         self.app.route(
             '/<model_name>/add',
             ['POST'],
-            add_model_post_view)
+            add_model_post_controller)
 
         self.app.route(
             '/<model_name>',
             ['GET'],
-            list_model_view)
+            list_model_controller)
+
+        self.app.route(
+            '/<model_name>/delete/<model_id>',
+            ['GET'],
+            delete_model_controller)
+
+        self.app.route(
+            '/<model_name>/edit/<model_id>',
+            ['GET'],
+            edit_model_get_controller)
+
+        self.app.route(
+            '/<model_name>/edit/<model_id>',
+            ['POST'],
+            edit_model_post_controller)
 
         app.mount(self.url_prefix, self.app)
 
@@ -69,6 +88,7 @@ class AdminSite(object):
 
             model_name = model.__name__.lower()
             model_data['name'] = model_name
+            model_data['model_class'] = model
 
             mapper = inspect(model)
             attrs = [prop.columns[0] for prop in mapper.attrs]
@@ -77,7 +97,7 @@ class AdminSite(object):
 
             model_data['add_url'] = '{0}/{1}/add'.format(self.url_prefix, model_name)
             model_data['list_url'] = '{0}/{1}'.format(self.url_prefix, model_name)
-            model_data['change_url'] = '{0}/{1}/change'.format(self.url_prefix, model_name)
+            model_data['edit_url'] = '{0}/{1}/edit'.format(self.url_prefix, model_name)
             model_data['delete_url'] = '{0}/{1}/delete'.format(self.url_prefix, model_name)
 
             models_dict[model] = model_data

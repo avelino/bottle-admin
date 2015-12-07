@@ -1,17 +1,23 @@
 # coding: utf-8
-from bottle import Bottle
+from bottle import Bottle, TEMPLATE_PATH
 import datetime
+import os
 from sqlalchemy import (create_engine, Column, DateTime, Integer, Numeric,
                         Sequence, String)
 from sqlalchemy.ext.declarative import declarative_base
 
+import bottle_admin
 from bottle_admin import site
+
+ADMIN_TEMPLATE_PATH = os.path.join(os.path.dirname(bottle_admin.__path__[0]),
+                                   'bottle_admin',
+                                   'views')
+
+TEMPLATE_PATH.insert(1, ADMIN_TEMPLATE_PATH)
 
 engine = create_engine('sqlite:///:memory:', echo=True)
 
 app = Bottle()
-site.setup_routing(app)
-site.engne = engine
 
 Base = declarative_base()
 
@@ -52,3 +58,11 @@ class Product(Base):
     def __repr__(self):
         return "<User('%s','%s', '%s')>" % (self.name, self.fullname,
                                             self.password)
+
+
+Product.metadata.create_all(engine)
+
+site.setup_routing(app)
+site.register(User)
+site.register(Product)
+site.engine = engine
