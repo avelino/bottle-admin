@@ -42,9 +42,9 @@ def edit_model_get_controller(model_name, model_id):
     meta = site.get_model_meta(model_name)
     session = sessionmaker(bind=site.engine)()
     obj = session.query(meta['model_class']).get(model_id)
-    obj.as_list = get_object_as_list(obj)
     if not obj:
-        return u'{0}: {1} not found'.format(meta['model_class'].__name__, model_id)
+        return u'{0} {1} not found'.format(meta['model_class'].__name__, model_id)
+    obj.as_list = get_object_as_list(obj)
     return {
         'meta': meta,
         'model': obj

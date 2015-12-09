@@ -56,14 +56,15 @@ def test_delete_model_controller(session, app_test):
 
     status = app_test.get('/admin/user/delete/{0}'.format(user2.id)).status
     assert status == '302 Found'
-    request = app_test.get('/admin/user/delete/{0}'.format(user2.id))
-    request.mustcontain('not found')
+    response = app_test.get('/admin/user/delete/{0}'.format(user2.id))
+    response.mustcontain('not found')
 
 
 def test_edit_model_get_controller(session, app_test):
     # TODO: tests with selenium or similar tool
-    with pytest.raises(AppError):
-        app_test.get('/admin/user/edit/1')
+    response = app_test.get('/admin/user/edit/1')
+    assert response.status == '200 OK'
+    response.mustcontain('not found')
 
 
 def test_edit_model_post_controller(session, app_test):
