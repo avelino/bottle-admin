@@ -27,11 +27,12 @@ class AdminSite(object):
         self.engine = engine
         self._registry = []
 
-    def register(self, model=None):
-        if model in self._registry:
-            message = u'Model {0} has already beeen registered'.format(model)
-            raise AlreadyRegistered(message)
-        self._registry.append(model)
+    def setup(self, engine, app):
+        self.setup_engine(engine)
+        self.setup_routing(app)
+
+    def setup_engine(self, engine):
+        self.engine = engine
 
     def setup_routing(self, app):
         from .controllers.main import (add_model_get_controller,
@@ -76,6 +77,12 @@ class AdminSite(object):
             edit_model_post_controller)
 
         app.mount(self.url_prefix, self.app)
+
+    def register(self, model):
+        if model in self._registry:
+            message = u'Model {0} has already beeen registered'.format(model)
+            raise AlreadyRegistered(message)
+        self._registry.append(model)
 
     def _build_models_dict(self):
         """
