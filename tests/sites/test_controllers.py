@@ -1,119 +1,175 @@
 # coding: utf-8
+from decimal import Decimal
 import pytest
 from sqlalchemy.orm import sessionmaker
-from webtest import AppError, TestApp
 
-from bottle_application import app, engine, User
+from bottle_application import app, engine, Product
+from testutils import VerboseTestApp, WebFunctionalTest
 
 
 @pytest.fixture(scope="function")
 def session(request):
     session = sessionmaker(bind=engine)()
-    session.query(User).delete()
     return session
 
 
-@pytest.fixture(scope="function")
-def app_test(request):
-    app_test = TestApp(app)
-    return app_test
+class TestControllers(WebFunctionalTest):
+    app_test = VerboseTestApp(app)
 
+    def test_add_model_get_controller(self, session):
+        # TODO: tests with selenium or similar tool
+        self.assert_302('/admin/product/add', '/admin/login')
 
-def test_add_model_get_controller(session, app_test):
-    # TODO: tests with selenium or similar tool
-    assert app_test.get('/admin/user/add').status == '200 OK'
+        self.login('admin', '123')
+        response = self.app_test.get('/admin/product/add')
+        assert response.status == '200 OK'
+        inputs = response.html.find_all('input')
+        assert inputs[0].attrs['name'] == 'name'
+        assert inputs[1].attrs['name'] == 'description'
+        assert inputs[2].attrs['name'] == 'price'
 
+        self.logout()
 
-def test_add_model_post_controller(session, app_test):
-    with pytest.raises(AppError):
-        app_test.post('/admin/user/add').status == '200 OK'
+    def test_add_model_post_controller(self, session):
+        self.assert_302('/admin/product/add', '/admin/login', 'POST')
 
-    assert app_test.get('/admin/user/add').status == '200 OK'
+        self.login('admin', '123')
+        response = self.app_test.post('/admin/product/add')
+        assert response.status == '200 OK'
+        response.mustcontain('not created')
 
-    response = app_test.post('/admin/user/add', {'name': 'name',
-                                                 'fullname': 'fullname',
-                                                 'password': 'password'})
-    assert response.status == '302 Found'
+        self.assert_200('/admin/product/add')
 
-    user = session.query(User).filter_by(name='name').first()
-    assert user.fullname == 'fullname'
-    assert user.password == 'password'
+        post = {'name': 'pp', 'description': 'des', 'price': 44.44}
+        response = self.app_test.post('/admin/product/add', post)
+        assert response.status == '302 Found'
+        assert '/admin/product' in response.location
 
+        product = session.query(Product).filter_by(name='pp').first()
+        assert product.name == 'pp'
+        assert product.description == 'des'
+        assert product.price == Decimal('44.44')
 
-def test_delete_model_controller(session, app_test):
-    app_test.get('/admin/user/delete/1').mustcontain('not found')
+        self.logout()
 
-    user1 = User(name='name', fullname='full', password='pass')
-    session.add(user1)
-    user2 = User(name='name2', fullname='full', password='pass')
-    session.add(user2)
-    session.commit()
+    def test_delete_model_controller(self, session):
+        self.assert_302('/admin/product/delete/1', '/admin/login')
 
-    status = app_test.get('/admin/user/delete/{0}'.format(user1.id)).status
-    assert status == '302 Found'
-    response = app_test.get('/admin/user/delete/{0}'.format(user1.id))
-    response.mustcontain('not found')
+        self.login('admin', '123')
+        session.query(Product).delete()
+        session.commit()
 
-    status = app_test.get('/admin/user/delete/{0}'.format(user2.id)).status
-    assert status == '302 Found'
-    response = app_test.get('/admin/user/delete/{0}'.format(user2.id))
-    response.mustcontain('not found')
+        self.app_test.get('/admin/product/delete/1').mustcontain('not found')
 
+        product1 = Product(name='p1', description='desc', price=1.1)
+        session.add(product1)
+        product2 = Product(name='p2', description='desc', price=2.2)
+        session.add(product2)
+        session.commit()
 
-def test_edit_model_get_controller(session, app_test):
-    # TODO: tests with selenium or similar tool
-    response = app_test.get('/admin/user/edit/1')
-    assert response.status == '200 OK'
-    response.mustcontain('not found')
+        url = '/admin/product/delete/{0}'.format(product1.id)
+        response = self.app_test.get(url)
+        assert response.status == '302 Found'
+        assert '/admin/product' in response.location
+        response = self.app_test.get(url)
+        response.mustcontain('not found')
 
+        url = '/admin/product/delete/{0}'.format(product2.id)
+        response = self.app_test.get(url)
+        assert response.status == '302 Found'
+        assert '/admin/product' in response.location
+        response = self.app_test.get(url)
+        response.mustcontain('not found')
 
-def test_edit_model_post_controller(session, app_test):
-    with pytest.raises(AppError):
-        app_test.post('/admin/user/edit/1')
+        self.logout()
 
-    user1 = User(name='name', fullname='full', password='pass')
-    session.add(user1)
-    session.commit()
+    def test_edit_model_get_controller(self, session):
+        self.assert_302('/admin/product/edit/1', '/admin/login')
 
-    assert app_test.get('/admin/user/edit/1').status == '200 OK'
+        self.login('admin', '123')
 
-    response = app_test.post('/admin/user/edit/1', {'name': 'namez0r',
-                                                    'fullname': 'fullz0r',
-                                                    'password': 'passz0r'})
-    assert response.status == '302 Found'
+        # TODO: tests with selenium or similar tool
+        response = self.app_test.get('/admin/product/edit/1')
+        assert response.status == '200 OK'
+        response.mustcontain('not found')
 
-    user1 = session.query(User).get(user1.id)
-    assert user1.name == 'namez0r'
-    assert user1.fullname == 'fullz0r'
-    assert user1.password == 'passz0r'
+        product1 = Product(name='p1', description='desc', price=1.1)
+        session.add(product1)
+        session.commit()
 
+        url = '/admin/product/edit/{0}'.format(product1.id)
+        response = self.app_test.get(url)
+        assert response.status == '200 OK'
+        inputs = response.html.find_all('input')
+        assert inputs[0].attrs['name'] == 'name'
+        assert inputs[1].attrs['name'] == 'description'
+        assert inputs[2].attrs['name'] == 'price'
 
-def test_list_model_controller(session, app_test):
-    response = app_test.get('/admin/user')
-    response.mustcontain('not found')
+        self.logout()
 
-    user1 = User(name='name', fullname='full', password='pass')
-    session.add(user1)
-    session.commit()
+    def test_edit_model_post_controller(self, session):
+        self.assert_302('/admin/product/edit/1', '/admin/login', 'POST')
 
-    response = app_test.get('/admin/user')
-    rows = len(response.html.find_all('tr'))
-    assert rows == 2
+        self.login('admin', '123')
 
-    user2 = User(name='name2', fullname='full', password='pass')
-    session.add(user2)
-    session.commit()
+        session.query(Product).delete()
+        session.commit()
+        response = self.app_test.post('/admin/product/edit/1')
+        assert response.status == '200 OK'
+        response.mustcontain('not found')
 
-    response = app_test.get('/admin/user')
-    rows = len(response.html.find_all('tr'))
-    assert rows == 3
+        product1 = Product(name='p1', description='desc', price=1.1)
+        session.add(product1)
+        session.commit()
 
+        url = '/admin/product/edit/{0}'.format(product1.id)
+        assert self.app_test.get(url).status == '200 OK'
+        session.close()
 
-def test_routes(session, app_test):
-    assert app_test.get('/admin').status == '200 OK'
-    assert app_test.get('/admin/user').status == '200 OK'
-    assert app_test.get('/admin/user/add').status == '200 OK'
-    assert app_test.get('/admin/user/delete/1').status == '200 OK'
-    assert app_test.get('/admin/product').status == '200 OK'
-    assert app_test.get('/admin/product/add').status == '200 OK'
-    assert app_test.get('/admin/product/delete/1').status == '200 OK'
+        post = {'name': 'pe', 'description': 'de', 'price': 1.5}
+        response = self.app_test.post(url, post)
+        assert response.status == '302 Found'
+
+        session = sessionmaker(bind=engine)()
+        p = session.query(Product).get(1)
+        assert p.name == 'pe'
+        assert p.description == 'de'
+        assert p.price == 1.5
+
+        self.logout()
+        session.close()
+
+    def test_list_model_controller(self, session):
+        self.assert_302('/admin/product', '/admin/login')
+
+        self.login('admin', '123')
+        session.query(Product).delete()
+        session.commit()
+
+        response = self.app_test.get('/admin/product')
+        response.mustcontain('not found')
+
+        product1 = Product(name='p1', description='desc', price=1.1)
+        session.add(product1)
+        session.commit()
+
+        response = self.app_test.get('/admin/product')
+        rows = len(response.html.find_all('tr'))
+        assert rows == 2
+
+        product2 = Product(name='p2', description='desc', price=2.2)
+        session.add(product2)
+        session.commit()
+
+        response = self.app_test.get('/admin/product')
+        rows = len(response.html.find_all('tr'))
+        assert rows == 3
+
+        self.logout()
+
+    def test_routes(self, session):
+        self.assert_302('/admin', '/admin/login')
+
+        self.login('admin', '123')
+        self.assert_200('/admin')
+        self.logout()

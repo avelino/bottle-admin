@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from bottle import TEMPLATE_PATH
 import os
 

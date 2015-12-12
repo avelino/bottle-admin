@@ -3,6 +3,8 @@
 from bottle import Bottle
 from sqlalchemy import inspect
 
+from bottle_admin import auth
+
 
 class AlreadyRegistered(Exception):
     pass
@@ -22,19 +24,21 @@ class AdminSite(object):
     def __repr__(self):
         return "<AdminSite('{0}', '{1}')>".format(self.app, self._registry)
 
-    def __init__(self, app=None, engine=None):
+    def __init__(self, app=None, engine=None, auth=None):
         self.app = app or Bottle()
         self.engine = engine
+        self.auth = auth
         self._registry = []
 
     def setup(self, engine, app):
-        self.setup_engine(engine)
-        self.setup_routing(app)
-
-    def setup_engine(self, engine):
         self.engine = engine
+        self.setup_routing(app)
+        auth.setup(self.engine, app)
+        print('***' * 100)
 
     def setup_routing(self, app):
+        from .auth.controllers import (login_get_controller, login_post_controller,
+                                       logout_controller)
         from .controllers.main import (add_model_get_controller,
                                        add_model_post_controller,
                                        edit_model_get_controller,
@@ -57,11 +61,6 @@ class AdminSite(object):
             add_model_post_controller)
 
         self.app.route(
-            '/<model_name>',
-            ['GET'],
-            list_model_controller)
-
-        self.app.route(
             '/<model_name>/delete/<model_id>',
             ['GET'],
             delete_model_controller)
@@ -76,6 +75,26 @@ class AdminSite(object):
             ['POST'],
             edit_model_post_controller)
 
+        self.app.route(
+            '/login',
+            ['GET'],
+            login_get_controller)
+
+        self.app.route(
+            '/login',
+            ['POST'],
+            login_post_controller)
+
+        self.app.route(
+            '/logout',
+            ['GET'],
+            logout_controller)
+
+        self.app.route(
+            '/<model_name>',
+            ['GET'],
+            list_model_controller)
+
         app.mount(self.url_prefix, self.app)
 
     def register(self, model):
@@ -83,6 +102,23 @@ class AdminSite(object):
             message = u'Model {0} has already beeen registered'.format(model)
             raise AlreadyRegistered(message)
         self._registry.append(model)
+
+    def get_model_meta_list(self):
+        models_dict = self._build_models_dict()
+        return sorted(models_dict.values(), key=lambda x: x['name'].lower())
+
+    def get_model_class(self, model_name):
+        for model_class in self._registry:
+            if model_class.__name__.lower() == model_name:
+                return model_class
+        raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
+
+    def get_model_meta(self, model_name):
+        models_meta = self.get_model_meta_list()
+        for meta in models_meta:
+            if meta['name'] == model_name:
+                return meta
+        raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
 
     def _build_models_dict(self):
         """
@@ -110,22 +146,7 @@ class AdminSite(object):
             models_dict[model] = model_data
         return models_dict
 
-    def get_model_meta_list(self):
-        models_dict = self._build_models_dict()
-        return sorted(models_dict.values(), key=lambda x: x['name'].lower())
-
-    def get_model_class(self, model_name):
-        for model_class in self._registry:
-            if model_class.__name__.lower() == model_name:
-                return model_class
-        raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
-
-    def get_model_meta(self, model_name):
-        models_meta = self.get_model_meta_list()
-        for meta in models_meta:
-            if meta['name'] == model_name:
-                return meta
-        raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
-
 
 site = AdminSite()
+site.register(auth.User)
+site.register(auth.Role)

@@ -1,6 +1,7 @@
 # coding: utf-8
 import pytest
-from bottle_application import Product, User
+from bottle_application import Product
+from bottle_admin.auth.models import User
 from bottle_admin.sites import AdminSite, AlreadyRegistered, NotRegistered
 
 
@@ -14,11 +15,8 @@ class TestAdminSite(object):
     def test_register(self, site):
         assert len(site._registry) == 0
 
-        site.register(User)
-        assert len(site._registry) == 1
-
         site.register(Product)
-        assert len(site._registry) == 2
+        assert len(site._registry) == 1
 
         with pytest.raises(AlreadyRegistered):
             site.register(User)
@@ -53,7 +51,8 @@ class TestAdminSite(object):
 
         site.register(User)
         metas = site.get_model_meta_list()
-        columns = set(('name', 'fullname', 'password', 'registration_date'))
+        columns = set(('username', 'fullname', 'hash', 'creation_date',
+                       'role', 'email_addr', 'desc', 'last_login'))
         self.assert_model_meta(metas[0], User, columns)
 
         site._registry = []
@@ -68,7 +67,8 @@ class TestAdminSite(object):
 
         site.register(User)
         meta = site.get_model_meta('user')
-        columns = set(('name', 'fullname', 'password', 'registration_date'))
+        columns = set(('username', 'fullname', 'hash', 'creation_date',
+                       'role', 'email_addr', 'desc', 'last_login'))
         self.assert_model_meta(meta, User, columns)
 
         site.register(Product)
