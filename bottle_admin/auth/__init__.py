@@ -2,7 +2,6 @@
 
 from cork import Cork
 from cork.backends import SqlAlchemyBackend
-from sqlalchemy.orm import sessionmaker
 
 from .models import Role, User
 
