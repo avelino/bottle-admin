@@ -12,7 +12,7 @@ def get_aaa():
     return getattr(__import__(__name__), 'aaa')
 
 
-def setup(engine, app):
+def setup(engine):
     Role.metadata.create_all(engine)
     User.metadata.create_all(engine)
 
