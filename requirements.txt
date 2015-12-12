@@ -3,3 +3,4 @@ bottle-boilerplate==0.3
 SQLAlchemy==1.0.9
 Beaker==1.7.0
 bottle-sqlalchemy==0.4.2
+bottle-cork==0.12.0
