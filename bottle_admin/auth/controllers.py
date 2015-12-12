@@ -9,8 +9,8 @@ def login_get_controller():
 
 
 def login_post_controller():
-    username = request.forms['username']
-    password = request.forms['password']
+    username = request.forms.get('username')
+    password = request.forms.get('password')
     aaa = get_aaa()
     aaa.login(username, password, success_redirect='/admin',
               fail_redirect='/admin/login')

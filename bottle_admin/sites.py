@@ -33,8 +33,7 @@ class AdminSite(object):
     def setup(self, engine, app):
         self.engine = engine
         self.setup_routing(app)
-        auth.setup(self.engine, app)
-        print('***' * 100)
+        auth.setup(self.engine)
 
     def setup_routing(self, app):
         from .auth.controllers import (login_get_controller, login_post_controller,
