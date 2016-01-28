@@ -2,21 +2,21 @@
 <!DOCTYPE html>
 
 {% block title %}
-Bottle Admin - Edit {{ meta.name }}: {{ model.id }}
+Bottle Admin - Edit {{ model.name }}: {{ obj.id }}
 {% endblock title %}
 
 {% block container %}
-<h3>Edit {{ meta.name }}: {{ model.id }}</h3>
-<form method="POST" action="{{ meta.edit_url }}/{{ model.id }}">
-  {% for column, value in model.as_list %}
-  {% if column != 'id' %}
-      <div class="row">
-        <div class="form-group col-md-4">
-          <label for="id_{{ column }}">{{ column|capitalize }}</label>
-          <input type="text" class="form-control" name="{{ column }}" id="id_{{ column }}" value="{{ value }}">
-        </div>
-      </div>
-  {% endif %}
+<h3>Edit {{ model.name }}: {{ obj.id }}</h3>
+<form method="POST" action="{{ model.edit_url }}/{{ obj.id }}">
+  {% for column, value in obj.as_list %}
+      {% if column != 'id' %}
+          <div class="row">
+            <div class="form-group col-md-4">
+              <label for="id_{{ column }}">{{ column|capitalize }}</label>
+              <input type="text" class="form-control" name="{{ column }}" id="id_{{ column }}" value="{{ value }}">
+            </div>
+          </div>
+      {% endif %}
   {% endfor %}
   <div class="row">
     <div class="form-group col-md-4">

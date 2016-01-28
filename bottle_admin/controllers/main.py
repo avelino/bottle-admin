@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 def home_controller():
     aaa = get_aaa()
     aaa.require(fail_redirect='/admin/login')
-    return {'models': site.get_model_meta_list()}
+    return {'models': site.get_models()}
 
 
 @jinja2_view('admin/add.html')
@@ -19,8 +19,8 @@ def add_model_get_controller(model_name):
     aaa = get_aaa()
     aaa.require(fail_redirect='/admin/login')
 
-    meta = site.get_model_meta(model_name)
-    return {'model': meta}
+    model = site.get_model(model_name)
+    return {'model': model}
 
 
 def add_model_post_controller(model_name):
@@ -28,29 +28,29 @@ def add_model_post_controller(model_name):
     aaa.require(fail_redirect='/admin/login')
 
     fields = dict(request.forms)
-    model_class = site.get_model_class(model_name)
+    model = site.get_model(model_name)
     session = sessionmaker(bind=site.engine)()
     try:
-        obj = model_class(**fields)
+        obj = model.model_cls(**fields)
     except TypeError:
         return u'{0} object not created. Not enough data'.format(model_name)
     session.add(obj)
     session.commit()
-    return redirect('/admin/{0}'.format(model_name))
+    return redirect('/admin/{0}'.format(model.name))
 
 
 def delete_model_controller(model_name, model_id):
     aaa = get_aaa()
     aaa.require(fail_redirect='/admin/login')
 
-    model_class = site.get_model_class(model_name)
+    model = site.get_model(model_name)
     session = sessionmaker(bind=site.engine)()
-    obj = session.query(model_class).get(model_id)
+    obj = session.query(model.model_cls).get(model_id)
     if not obj:
-        return u'{0}: {1} not found'.format(model_class.__name__, model_id)
+        return u'{0}: {1} not found'.format(model.name, model_id)
     session.delete(obj)
     session.commit()
-    return redirect('/admin/{0}'.format(model_name))
+    return redirect('/admin/{0}'.format(model.name))
 
 
 @jinja2_view('admin/edit.html')
@@ -58,15 +58,15 @@ def edit_model_get_controller(model_name, model_id):
     aaa = get_aaa()
     aaa.require(fail_redirect='/admin/login')
 
-    meta = site.get_model_meta(model_name)
+    model = site.get_model(model_name)
     session = sessionmaker(bind=site.engine)()
-    obj = session.query(meta['model_class']).get(model_id)
+    obj = session.query(model.model_cls).get(model_id)
     if not obj:
-        return u'{0} {1} not found'.format(meta['model_class'].__name__, model_id)
+        return u'{0} {1} not found'.format(model.name, model_id)
     obj.as_list = get_object_as_list(obj)
     return {
-        'meta': meta,
-        'model': obj
+        'model': model,
+        'obj': obj
     }
 
 
@@ -75,9 +75,9 @@ def edit_model_post_controller(model_name, model_id):
     aaa = get_aaa()
     aaa.require(fail_redirect='/admin/login')
 
-    model_class = site.get_model_class(model_name)
+    model = site.get_model(model_name)
     session = sessionmaker(bind=site.engine)()
-    obj = session.query(model_class).get(model_id)
+    obj = session.query(model.model_cls).get(model_id)
     fields = dict(request.forms)
     for column, value in fields.items():
         setattr(obj, column, value)
@@ -94,11 +94,11 @@ def list_model_controller(model_name):
     aaa = get_aaa()
     aaa.require(fail_redirect='/admin/login')
 
-    model_class = site.get_model_class(model_name)
+    model = site.get_model(model_name)
     session = sessionmaker(bind=site.engine)()
-    objects = list(session.query(model_class).all())
+    objects = list(session.query(model.model_cls).all())
 
     return {
-        'model_meta': site.get_model_meta(model_name),
+        'model': model,
         'results': get_objects_as_list(objects),
     }

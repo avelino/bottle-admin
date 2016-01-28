@@ -1,9 +1,9 @@
 # coding: utf-8
 
 from bottle import Bottle
-from sqlalchemy import inspect
 
 from bottle_admin import auth
+from bottle_admin.options import ModelAdmin
 
 
 class AlreadyRegistered(Exception):
@@ -33,7 +33,12 @@ class AdminSite(object):
     def setup(self, engine, app):
         self.engine = engine
         self.setup_routing(app)
+        self.setup_models()
         auth.setup(self.engine)
+
+    def setup_models(self):
+        self.register(auth.User)
+        self.register(auth.Role)
 
     def setup_routing(self, app):
         from .auth.controllers import (login_get_controller, login_post_controller,
@@ -96,56 +101,34 @@ class AdminSite(object):
 
         app.mount(self.url_prefix, self.app)
 
-    def register(self, model):
-        if model in self._registry:
+    def register(self, model, model_admin_cls=None):
+        if self.is_registered(model):
             message = u'Model {0} has already beeen registered'.format(model)
             raise AlreadyRegistered(message)
-        self._registry.append(model)
 
-    def get_model_meta_list(self):
-        models_dict = self._build_models_dict()
-        return sorted(models_dict.values(), key=lambda x: x['name'].lower())
+        if model_admin_cls:
+            model_admin = model_admin_cls(model)
+        else:
+            model_admin = ModelAdmin(model)
+        self._registry.append(model_admin)
 
-    def get_model_class(self, model_name):
-        for model_class in self._registry:
-            if model_class.__name__.lower() == model_name:
-                return model_class
+    def is_registered(self, model):
+        if type(model) is ModelAdmin:
+            return model in self._registry
+
+        for model_admin in self._registry:
+            if model == model_admin.model_cls:
+                return True
+        return False
+
+    def get_models(self):
+        return self._registry
+
+    def get_model(self, model_name):
+        for model_admin in self._registry:
+            if model_admin.name == model_name:
+                return model_admin
         raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
-
-    def get_model_meta(self, model_name):
-        models_meta = self.get_model_meta_list()
-        for meta in models_meta:
-            if meta['name'] == model_name:
-                return meta
-        raise NotRegistered(u'Model {0} has not been registered'.format(model_name))
-
-    def _build_models_dict(self):
-        """
-        Build the models dict containing the URLs for each action and model
-        """
-
-        models_dict = {}
-        for model in self._registry:
-            model_data = {}
-
-            model_name = model.__name__.lower()
-            model_data['name'] = model_name
-            model_data['model_class'] = model
-
-            mapper = inspect(model)
-            attrs = [prop.columns[0] for prop in mapper.attrs]
-            model_data['columns'] = (prop.name for prop in attrs
-                                     if prop.name != 'id')
-
-            model_data['add_url'] = '{0}/{1}/add'.format(self.url_prefix, model_name)
-            model_data['list_url'] = '{0}/{1}'.format(self.url_prefix, model_name)
-            model_data['edit_url'] = '{0}/{1}/edit'.format(self.url_prefix, model_name)
-            model_data['delete_url'] = '{0}/{1}/delete'.format(self.url_prefix, model_name)
-
-            models_dict[model] = model_data
-        return models_dict
 
 
 site = AdminSite()
-site.register(auth.User)
-site.register(auth.Role)
