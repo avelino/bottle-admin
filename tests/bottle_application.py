@@ -10,6 +10,7 @@ import bottle_admin
 from bottle_admin import site
 from bottle_admin.auth import get_aaa
 from bottle_admin.auth.models import Role, User
+from bottle_admin.options import ModelAdmin
 
 ADMIN_TEMPLATE_PATH = os.path.join(os.path.dirname(bottle_admin.__path__[0]),
                                    'bottle_admin',
@@ -44,8 +45,13 @@ Product.metadata.create_all(engine)
 
 app = Bottle()
 
+
+class ProductAdmin(ModelAdmin):
+    list_display = ('name', 'description', 'price')
+
+
 site.setup(engine, app)
-site.register(Product)
+site.register(Product, ProductAdmin)
 
 session_opts = {
     'session.type': 'file',

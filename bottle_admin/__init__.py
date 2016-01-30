@@ -5,7 +5,7 @@ import os
 
 from .sites import site
 
-__all__ = ['site', 'AdminSite']
+__all__ = ['site']
 
 
 ADMIN_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)))

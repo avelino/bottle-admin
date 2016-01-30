@@ -1,6 +1,7 @@
 # coding: utf-8
 import pytest
 from bottle_admin.auth.models import User
+from bottle_admin.options import ModelAdmin
 from bottle_admin.sites import AdminSite, AlreadyRegistered, NotRegistered
 
 from bottle_application import Product
@@ -24,6 +25,12 @@ class TestAdminSite(VerboseTestApp):
         with pytest.raises(AlreadyRegistered):
             site.register(User)
             site.register(Product)
+
+    def test_is_registered(self, site):
+        assert site.is_registered(ModelAdmin(Product, site))
+        site.register(Product)
+        product = site._registry[0]
+        assert site.is_registered(product)
 
     def test_get_model(self, site):
         with pytest.raises(NotRegistered):

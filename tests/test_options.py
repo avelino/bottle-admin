@@ -1,4 +1,5 @@
 # coding: utf-8
+from bottle_admin import site
 from bottle_admin.options import ModelAdmin
 from bottle_admin.sites import AdminSite
 # from sqlalchemy.orm import sessionmaker
@@ -21,11 +22,11 @@ class TestAdminOptions(WebFunctionalTest):
         assert model.delete_url == delete_url
 
     def test_object(self):
-        user_model = ModelAdmin(User)
+        user_model = ModelAdmin(User, site)
         columns = set(('username', 'fullname', 'hash', 'creation_date',
                        'role', 'email_addr', 'desc', 'last_login'))
         TestAdminOptions.assert_model_meta(user_model, columns)
 
-        product_model = ModelAdmin(Product)
+        product_model = ModelAdmin(Product, site)
         columns = set(('name', 'description', 'price'))
         TestAdminOptions.assert_model_meta(product_model, columns)
