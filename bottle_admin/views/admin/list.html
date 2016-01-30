@@ -21,7 +21,7 @@ Bottle Admin - List {{ model.name }}
   <thead>
       <tr>
         <th>Actions</th>
-        {% for column in model.columns %}
+        {% for column in model.list_display %}
           <th>{{ column }}</th>
         {% endfor %}
       </tr>

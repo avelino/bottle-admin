@@ -37,8 +37,9 @@ class AdminSite(object):
         auth.setup(self.engine)
 
     def setup_models(self):
-        self.register(auth.User)
-        self.register(auth.Role)
+        from .auth.admin import RoleAdmin, UserAdmin
+        self.register(auth.Role, RoleAdmin)
+        self.register(auth.User, UserAdmin)
 
     def setup_routing(self, app):
         from .auth.controllers import (login_get_controller, login_post_controller,
@@ -101,16 +102,16 @@ class AdminSite(object):
 
         app.mount(self.url_prefix, self.app)
 
-    def register(self, model, model_admin_cls=None):
-        if self.is_registered(model):
+    def register(self, model, admin_class=None):
+        if not admin_class:
+            admin_class = ModelAdmin
+        admin_obj = admin_class(model, self)
+
+        if self.is_registered(admin_obj):
             message = u'Model {0} has already beeen registered'.format(model)
             raise AlreadyRegistered(message)
 
-        if model_admin_cls:
-            model_admin = model_admin_cls(model)
-        else:
-            model_admin = ModelAdmin(model)
-        self._registry.append(model_admin)
+        self._registry.append(admin_obj)
 
     def is_registered(self, model):
         if type(model) is ModelAdmin:

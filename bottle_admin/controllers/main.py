@@ -63,7 +63,7 @@ def edit_model_get_controller(model_name, model_id):
     obj = session.query(model.model_cls).get(model_id)
     if not obj:
         return u'{0} {1} not found'.format(model.name, model_id)
-    obj.as_list = get_object_as_list(obj)
+    obj.as_list = get_object_as_list(model, obj)
     return {
         'model': model,
         'obj': obj
@@ -96,9 +96,10 @@ def list_model_controller(model_name):
 
     model = site.get_model(model_name)
     session = sessionmaker(bind=site.engine)()
-    objects = list(session.query(model.model_cls).all())
+    fields = model.get_select_fields()
+    objects = list(session.query(model.model_cls.id, *fields).all())
 
     return {
         'model': model,
-        'results': get_objects_as_list(objects),
+        'results': get_objects_as_list(model, objects),
     }
