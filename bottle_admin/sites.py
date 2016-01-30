@@ -37,7 +37,7 @@ class AdminSite(object):
         auth.setup(self.engine)
 
     def setup_models(self):
-        from auth.admin import RoleAdmin, UserAdmin
+        from .auth.admin import RoleAdmin, UserAdmin
         self.register(auth.Role, RoleAdmin)
         self.register(auth.User, UserAdmin)
 
